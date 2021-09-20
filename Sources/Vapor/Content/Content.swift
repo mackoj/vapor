@@ -79,6 +79,9 @@ extension Content {
         } catch {
             return request.eventLoop.makeFailedFuture(error)
         }
+      if response.body.string?.hasPrefix("\r\n") {
+        dump("🔥")
+      }
         return request.eventLoop.makeSucceededFuture(response)
     }
 
