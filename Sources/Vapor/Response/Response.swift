@@ -75,6 +75,7 @@ public final class Response: CustomStringConvertible {
         func encode<E>(_ encodable: E, using encoder: ContentEncoder) throws where E : Encodable {
             var body = ByteBufferAllocator().buffer(capacity: 0)
             try encoder.encode(encodable, to: &body, headers: &self.response.headers)
+            dump("\(#function).\(#line):"String(buffer: body))
             self.response.body = .init(buffer: body)
         }
 
@@ -90,6 +91,7 @@ public final class Response: CustomStringConvertible {
             try content.beforeEncode()
             var body = ByteBufferAllocator().buffer(capacity: 0)
             try encoder.encode(content, to: &body, headers: &self.response.headers)
+            dump("\(#function).\(#line):"String(buffer: body))
             self.response.body = .init(buffer: body)
         }
 
