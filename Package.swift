@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.4
 import PackageDescription
 
 let package = Package(
@@ -15,8 +15,8 @@ let package = Package(
     ],
     dependencies: [
         // HTTP client library built on SwiftNIO
-        .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.2.0"),
-    
+        .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.8.2"),
+
         // Sugary extensions for the SwiftNIO library
         .package(url: "https://github.com/vapor/async-kit.git", from: "1.0.0"),
 
@@ -24,7 +24,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/console-kit.git", from: "4.0.0"),
 
         // 🔑 Hashing (BCrypt, SHA2, HMAC), encryption (AES), public-key (RSA), and random data generation.
-        .package(url: "https://github.com/apple/swift-crypto.git", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-crypto.git", "1.0.0" ..< "3.0.0"),
 
         // 🚍 High-performance trie-node router.
         .package(url: "https://github.com/vapor/routing-kit.git", from: "4.0.0"),
@@ -33,13 +33,13 @@ let package = Package(
         .package(url: "https://github.com/swift-server/swift-backtrace.git", from: "1.1.1"),
         
         // Event-driven network application framework for high performance protocol servers & clients, non-blocking.
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.18.0"),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.33.0"),
         
         // Bindings to OpenSSL-compatible libraries for TLS support in SwiftNIO
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.8.0"),
         
         // HTTP/2 support for SwiftNIO
-        .package(url: "https://github.com/apple/swift-nio-http2.git", from: "1.13.0"),
+        .package(url: "https://github.com/apple/swift-nio-http2.git", from: "1.20.0"),
         
         // Useful code around SwiftNIO.
         .package(url: "https://github.com/apple/swift-nio-extras.git", from: "1.0.0"),
@@ -76,6 +76,8 @@ let package = Package(
             .product(name: "Logging", package: "swift-log"),
             .product(name: "Metrics", package: "swift-metrics"),
             .product(name: "NIO", package: "swift-nio"),
+            .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
+            .product(name: "NIOCore", package: "swift-nio"),
             .product(name: "NIOExtras", package: "swift-nio-extras"),
             .product(name: "NIOFoundationCompat", package: "swift-nio"),
             .product(name: "NIOHTTPCompression", package: "swift-nio-extras"),
@@ -96,7 +98,9 @@ let package = Package(
             // Enable better optimizations when building in Release configuration. Despite the use of
             // the `.unsafeFlags` construct required by SwiftPM, this flag is recommended for Release
             // builds. See <https://github.com/swift-server/guides#building-for-production> for details.
-            .unsafeFlags(["-cross-module-optimization"], .when(configuration: .release))
+            .unsafeFlags([
+                            "-cross-module-optimization"
+            ], .when(configuration: .release)),
         ]),
 
         // Testing
@@ -104,6 +108,10 @@ let package = Package(
             .target(name: "Vapor"),
         ]),
         .testTarget(name: "VaporTests", dependencies: [
+            .product(name: "NIOTestUtils", package: "swift-nio"),
+            .target(name: "XCTVapor"),
+        ]),
+        .testTarget(name: "AsyncTests", dependencies: [
             .product(name: "NIOTestUtils", package: "swift-nio"),
             .target(name: "XCTVapor"),
         ]),

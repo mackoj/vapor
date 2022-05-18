@@ -2,11 +2,11 @@
 ///
 /// Types that conform to this protocol can be returned in route closures.
 public protocol ResponseEncodable {
-    /// Encodes an instance of `Self` to a `HTTPResponse`.
+    /// Encodes an instance of `Self` to a `Response`.
     ///
     /// - parameters:
-    ///     - for: The `HTTPRequest` associated with this `HTTPResponse`.
-    /// - returns: An `HTTPResponse`.
+    ///     - for: The `Request` associated with this `Response`.
+    /// - returns: A `Response`.
     func encodeResponse(for request: Request) -> EventLoopFuture<Response>
 }
 
@@ -14,10 +14,10 @@ public protocol ResponseEncodable {
 ///
 /// Types that conform to this protocol can decode requests to their type.
 public protocol RequestDecodable {
-    /// Decodes an instance of `HTTPRequest` to a `Self`.
+    /// Decodes an instance of `Request` to a `Self`.
     ///
     /// - parameters:
-    ///     - request: The `HTTPRequest` to be decoded.
+    ///     - request: The `Request` to be decoded.
     /// - returns: An asynchronous `Self`.
     static func decodeRequest(_ request: Request) -> EventLoopFuture<Self>
 }
@@ -33,7 +33,7 @@ extension Request: RequestDecodable {
 extension ResponseEncodable {
     /// Asynchronously encodes `Self` into a `Response`, setting the supplied status and headers.
     ///
-    ///     router.post("users") { req -> Future<HTTPResponse> in
+    ///     router.post("users") { req -> EventLoopFuture<Response> in
     ///         return try req.content
     ///             .decode(User.self)
     ///             .save(on: req)
@@ -58,14 +58,14 @@ extension ResponseEncodable {
 // MARK: Default Conformances
 
 extension Response: ResponseEncodable {
-    /// See `HTTPResponseCodable`.
+    // See `ResponseEncodable`.
     public func encodeResponse(for request: Request) -> EventLoopFuture<Response> {
         return request.eventLoop.makeSucceededFuture(self)
     }
 }
 
 extension StaticString: ResponseEncodable {
-    /// See `HTTPResponseEncodable`.
+    // See `ResponseEncodable`.
     public func encodeResponse(for request: Request) -> EventLoopFuture<Response> {
         let res = Response(headers: staticStringHeaders, body: .init(staticString: self))
         return request.eventLoop.makeSucceededFuture(res)
@@ -73,7 +73,7 @@ extension StaticString: ResponseEncodable {
 }
 
 extension String: ResponseEncodable {
-    /// See `HTTPResponseEncodable`.
+    // See `ResponseEncodable`.
     public func encodeResponse(for request: Request) -> EventLoopFuture<Response> {
         let res = Response(headers: staticStringHeaders, body: .init(string: self))
         return request.eventLoop.makeSucceededFuture(res)
@@ -81,7 +81,7 @@ extension String: ResponseEncodable {
 }
 
 extension EventLoopFuture: ResponseEncodable where Value: ResponseEncodable {
-    /// See `HTTPResponseEncodable`.
+    // See `ResponseEncodable`.
     public func encodeResponse(for request: Request) -> EventLoopFuture<Response> {
         return self.flatMap { t in
             return t.encodeResponse(for: request)
@@ -89,4 +89,4 @@ extension EventLoopFuture: ResponseEncodable where Value: ResponseEncodable {
     }
 }
 
-private let staticStringHeaders: HTTPHeaders = ["content-type": "text/plain; charset=utf-8"]
+internal let staticStringHeaders: HTTPHeaders = ["content-type": "text/plain; charset=utf-8"]
